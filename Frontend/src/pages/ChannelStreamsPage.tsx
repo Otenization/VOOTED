@@ -83,18 +83,42 @@ const formatDuration = (seconds: number | null): string => {
 
 export default function ChannelStreamsPage() {
   const [channelUrl, setChannelUrl] = useState(loadDefaultChannelUrl);
-    const defaultLoadedRef = useRef(false);
+  const backendDefaultAppliedRef = useRef(false);
+  const channelEditedRef = useRef(false);
 
-    // Fetch the backend-persisted default channel URL on mount.
-    useEffect(() => {
-      void fetchSettings().then((s) => {
-        const backendDefault = normalizeStreamsTabUrl(s.app.default_channel_url);
-        if (backendDefault && !defaultLoadedRef.current) {
-          defaultLoadedRef.current = true;
-          setChannelUrl((current) => (current ? current : backendDefault));
+  // Apply backend runtime default once on mount. It should win over any stale
+  // localStorage value, unless the user has already started typing.
+  useEffect(() => {
+    let disposed = false;
+
+    void fetchSettings()
+      .then((s) => {
+        if (disposed || backendDefaultAppliedRef.current || channelEditedRef.current) {
+          return;
         }
-      }).catch(() => { /* silently ignore — static config is fallback */ });
-    }, []);
+
+        backendDefaultAppliedRef.current = true;
+        const backendDefault = normalizeStreamsTabUrl(s.app.default_channel_url);
+        setChannelUrl(backendDefault || '');
+
+        try {
+          if (backendDefault) {
+            window.localStorage.setItem(DEFAULT_CHANNEL_STORAGE_KEY, backendDefault);
+          } else {
+            window.localStorage.removeItem(DEFAULT_CHANNEL_STORAGE_KEY);
+          }
+        } catch {
+          // Ignore localStorage write failures.
+        }
+      })
+      .catch(() => {
+        // Ignore settings fetch failures; localStorage/default input still works.
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
@@ -286,7 +310,10 @@ export default function ChannelStreamsPage() {
               type="url"
               inputMode="url"
               value={channelUrl}
-              onChange={(event) => setChannelUrl(event.target.value)}
+              onChange={(event) => {
+                channelEditedRef.current = true;
+                setChannelUrl(event.target.value);
+              }}
               onBlur={() => setChannelUrl((current) => normalizeStreamsTabUrl(current))}
               placeholder="https://www.youtube.com/@YourChannel/streams"
               disabled={loading || queueing}

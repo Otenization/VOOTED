@@ -2,7 +2,6 @@ type AppConfig = {
   app: {
     name: string;
     subtitle: string;
-    default_channel_url: string;
   };
   api: {
     base_url: string;
@@ -12,8 +11,7 @@ type AppConfig = {
 const DEFAULT_CONFIG: AppConfig = {
   app: {
     name: 'VOOTED',
-    subtitle: 'Video on Ote demand.',
-    default_channel_url: 'https://www.youtube.com/@SleepyOteEnded/streams',
+    subtitle: "Ote's portable local web app for downloading your own YouTube VODs.",
   },
   api: {
     base_url: '',
@@ -32,16 +30,13 @@ const normalizeBaseUrl = (value: string | undefined | null): string => {
 
 const parseConfig = (raw: unknown): AppConfig => {
   const obj = raw as {
-    app?: { name?: string; subtitle?: string; default_channel_url?: string };
+    app?: { name?: string; subtitle?: string };
     api?: { base_url?: string };
   };
   return {
     app: {
       name: String(obj?.app?.name || DEFAULT_CONFIG.app.name).trim() || DEFAULT_CONFIG.app.name,
       subtitle: String(obj?.app?.subtitle || DEFAULT_CONFIG.app.subtitle).trim() || DEFAULT_CONFIG.app.subtitle,
-      default_channel_url:
-        String(obj?.app?.default_channel_url || DEFAULT_CONFIG.app.default_channel_url).trim()
-        || DEFAULT_CONFIG.app.default_channel_url,
     },
     api: {
       base_url: normalizeBaseUrl(obj?.api?.base_url),

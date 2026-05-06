@@ -6,9 +6,9 @@ Portable executables for VOOTED — YouTube VOD downloader. Drop the binary for 
 
 | Binary                          | Platform                                          | Size  |
 |---------------------------------|---------------------------------------------------|-------|
-| `VOOTED-win64-1.0.3.exe`        | Windows x64 (Windows 10 / 11)                     | 59 MB |
-| `VOOTED-linux-x64-1.0.3`        | Linux x64 (Ubuntu, Debian, Fedora, Arch, …)       | 72 MB |
-| `VOOTED-linux-arm64-1.0.3`      | Linux ARM64 (Raspberry Pi 4/5, Apple Silicon)     | 62 MB |
+| `VOOTED-win64-1.0.4.exe`        | Windows x64 (Windows 10 / 11)                     | 59 MB |
+| `VOOTED-linux-x64-1.0.4`        | Linux x64 (Ubuntu, Debian, Fedora, Arch, …)       | 72 MB |
+| `VOOTED-linux-arm64-1.0.4`      | Linux ARM64 (Raspberry Pi 4/5, Apple Silicon)     | 62 MB |
 | `VOOTED.exe`                    | Legacy Windows build (kept for backwards compat)  | 59 MB |
 
 Each binary is fully self-contained — bundled Node.js runtime + complete VOOTED backend + the frontend dashboard. The external runtime dependencies are `yt-dlp` (the downloader) and `ffmpeg` (used by yt-dlp to merge / remux the final mp4). On Windows, **both can be auto-provisioned in portable mode** during first-run setup; on Linux you currently still need to install ffmpeg yourself (yt-dlp portable still works).
@@ -17,7 +17,7 @@ Each binary is fully self-contained — bundled Node.js runtime + complete VOOTE
 
 ### Windows
 
-1. Double-click `VOOTED-win64-1.0.3.exe` — a terminal window opens and your default browser launches automatically.
+1. Double-click `VOOTED-win64-1.0.4.exe` — a terminal window opens and your default browser launches automatically.
 2. First time only: a setup card appears asking you to confirm the folder and your VOD save location. Click **Confirm & Start VOOTED**.
 3. Paste a YouTube URL into the dashboard, click **Queue download**, and watch it run.
 4. Close VOOTED via the **✕ Close App** button in the top nav.
@@ -26,13 +26,13 @@ Each binary is fully self-contained — bundled Node.js runtime + complete VOOTE
 
 ```bash
 # Make it executable (one-time after copying)
-chmod +x VOOTED-linux-x64-1.0.3    # or VOOTED-linux-arm64-1.0.3
+chmod +x VOOTED-linux-x64-1.0.4    # or VOOTED-linux-arm64-1.0.4
 
 # Run it
-./VOOTED-linux-x64-1.0.3
+./VOOTED-linux-x64-1.0.4
 
 # Or skip the browser auto-launch (useful for headless servers)
-VOOTED_NO_BROWSER=1 ./VOOTED-linux-x64-1.0.3
+VOOTED_NO_BROWSER=1 ./VOOTED-linux-x64-1.0.4
 ```
 
 The first run shows the setup card in your browser at `http://localhost:8111` (or whichever port VOOTED bound to — check the terminal output if 8111 was busy).
@@ -74,7 +74,7 @@ Configure cookie auth via **Settings → Cookie auth** — see the section above
 If yt-dlp can pull video + audio streams but fails to remux to mp4, ffmpeg is missing. On Windows, re-run setup and pick **Portable** to auto-download it. On Linux/macOS, install ffmpeg via your package manager (`apt install ffmpeg`, `brew install ffmpeg`, etc.). VOOTED stores the active ffmpeg path under `downloader.ffmpeg_location` in `vooted.runtime.json`; clearing that field forces a re-detect on next start.
 
 ### Linux: "Permission denied" when running the binary
-Linux binaries need the execute bit. Run `chmod +x VOOTED-linux-x64-1.0.3` once, then `./VOOTED-linux-x64-1.0.3`. This is needed after copying via SCP or extracting from a zip — most filesystems don't preserve the execute bit on transfer.
+Linux binaries need the execute bit. Run `chmod +x VOOTED-linux-x64-1.0.4` once, then `./VOOTED-linux-x64-1.0.4`. This is needed after copying via SCP or extracting from a zip — most filesystems don't preserve the execute bit on transfer.
 
 ### Linux: binary won't start, complains about glibc
 The binaries are built against glibc ≥ 2.28. Very old distros (Ubuntu 18.04, Debian 9 / 10, RHEL 7) won't run them. Upgrade or build from source.
@@ -111,7 +111,7 @@ The `data/` folder next to the EXE holds the job database and any cookie files. 
 Click **✕ Close App** in the top nav. A confirmation modal appears that probes the server first — if VOOTED is alive it stops the local server, if it's already gone it just closes the tab. Either way the EXE process exits cleanly.
 
 If the modal fails, you can also stop the EXE from your OS:
-- **Windows**: close the terminal window, or `taskkill /F /IM VOOTED-win64-1.0.3.exe`
+- **Windows**: close the terminal window, or `taskkill /F /IM VOOTED-win64-1.0.4.exe`
 - **Linux**: `Ctrl+C` in the terminal, or `pkill -f VOOTED-linux`
 
 ## Building from source
