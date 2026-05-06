@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "VOOTED",
+    "subtitle": "Video on Ote demand.",
+    "default_channel_url": "https://www.youtube.com/@SleepyOteEnded/streams"
+  },
+  "api": {
+    "base_url": ""
+  }
+}

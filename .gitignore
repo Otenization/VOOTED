@@ -1,0 +1,42 @@
+.history/
+.vscode/
+.idea/
+
+AI_TemplateCreation.md
+AI_CarryOn.md
+AI_ProgressTracking.md
+Claude_Assignment.md
+Ref/AI_CarryOn.md
+Ref/AI_ProgressTracking.md
+
+Backend/public/dist/
+
+# Frontend live config — keep config.example.json, ignore the personal copy.
+# (Frontend/src/config.ts falls back to config.example.json when missing.)
+Frontend/public/config.json
+
+# Built portable binaries — ship via GitHub Releases, not the repo tree.
+# The Release/README.md is kept so the folder still self-documents.
+Release/VOOTED-*
+Release/*.exe
+
+# Secrets and local env files
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+
+# Defensive: any cookies file outside the already-ignored Backend/data/cookies/.
+*cookies*.txt
+*cookies*.json
+
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,55 @@
+{
+    "app": {
+        "port": 3000,
+        "auto_open_browser": true
+    },
+    "logging": {
+        "message": {
+            "log_directory": "./logs",
+            "log_file_prefix": "message_",
+            "log_file_postfix": "",
+            "log_to_file": true,
+            "log_to_console": true,
+            "log_to_database": false
+        },
+        "request": {
+            "log_directory": "./logs",
+            "log_file_prefix": "requests_",
+            "log_file_postfix": "",
+            "log_to_file": true,
+            "log_to_console": true,
+            "log_to_database": false
+        },
+        "fastify": true,
+        "sequelize": {
+            "benchmark": true,
+            "log_directory": "./logs",
+            "log_file_prefix": "queries_",
+            "log_file_postfix": "",
+            "log_to_file": true,
+            "log_to_console": true
+        }
+    },
+    "database": {
+        "enabled": false,
+        "sync": {
+            "force": false,
+            "alter": false
+        },
+        "seed": {
+            "force_template_items_sync": false
+        },
+        "connection": {
+            "username": "",
+            "password": "",
+            "database": "",
+            "schemas": {
+                "parent": "public",
+                "project": ""
+            },
+            "host": "127.0.0.1",
+            "port": 5432,
+            "dialect": "postgres"
+        }
+    }
+}

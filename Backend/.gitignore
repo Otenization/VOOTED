@@ -1,0 +1,11 @@
+.history
+logs/
+node_modules/
+configs/
+config.json
+vooted.runtime.json
+voote.runtime.json
+data/
+Youtube_VOD/
+dist-server/
+.vscode/
