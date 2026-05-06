@@ -1,5 +1,6 @@
 import { completeSetup } from '../../services/runtime-bootstrap.service.js'
 import { isYtDlpAvailable } from '../../services/yt-dlp-manager.service.js'
+import { isFfmpegAvailable } from '../../services/ffmpeg-manager.service.js'
 import { pickFolder } from '../../services/folder-picker.service.js'
 import { checkFolderSafety } from '../../services/folder-safety.service.js'
 import {
@@ -19,6 +20,7 @@ export default async function setupRoutes(fastify) {
   fastify.get('/status', async (_request, reply) => {
     const needsSetup = peekYoutubeJobService() === null
     const ytDlpAvailable = isYtDlpAvailable()
+    const ffmpegAvailable = isFfmpegAvailable()
     const appDir = fastify.runtime?.appDir || null
     // Only useful while the user is actually on the setup screen — a noisy
     // shared folder is the warning we want to surface there. Computing it
@@ -31,6 +33,7 @@ export default async function setupRoutes(fastify) {
         needsSetup,
         appDir,
         ytDlpAvailable,
+        ffmpegAvailable,
         folderSafety,
       },
     })

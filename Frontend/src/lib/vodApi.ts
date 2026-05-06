@@ -217,6 +217,7 @@ export type SetupStatus = {
   needsSetup: boolean;
   appDir: string | null;
   ytDlpAvailable: boolean;
+  ffmpegAvailable?: boolean;
   folderSafety?: FolderSafety;
 };
 

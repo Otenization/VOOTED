@@ -71,6 +71,7 @@ Note: SQL query log toggle is intentionally removed from the user UI because the
 Downloader settings include:
 
 - yt-dlp command/path
+- ffmpeg location (auto-populated on Windows when portable ffmpeg is provisioned; manually editable in `vooted.runtime.json` under `downloader.ffmpeg_location`)
 
 Cookie auth supports manual import:
 
@@ -94,6 +95,7 @@ Prerequisites:
 
 - Node.js
 - yt-dlp available on PATH, or configure the executable in Settings
+- ffmpeg available on PATH (used by yt-dlp for merging/remuxing). On Windows, the portable / auto setup flow auto-downloads it; on Linux/macOS install via your package manager (`apt install ffmpeg`, `brew install ffmpeg`, etc.).
 
 Install:
 

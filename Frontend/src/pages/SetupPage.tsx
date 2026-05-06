@@ -59,7 +59,9 @@ export default function SetupPage({ setupStatus, onComplete }: Props) {
     setSetupProgress(10);
     const likelyDownload = ytDlpChoice === 'portable' || !setupStatus.ytDlpAvailable;
     setSetupProgressText(
-      likelyDownload ? 'Downloading portable yt-dlp...' : 'Applying setup settings...',
+      likelyDownload
+        ? 'Downloading portable downloader tools (yt-dlp + ffmpeg)...'
+        : 'Applying setup settings...',
     );
 
     let progressTimer: number | null = window.setInterval(() => {
@@ -226,9 +228,20 @@ export default function SetupPage({ setupStatus, onComplete }: Props) {
 
           {setupStatus.ytDlpAvailable && (
             <div className="setup-section">
-              <p className="setup-label">YouTube downloader (yt-dlp)</p>
+              <p className="setup-label">YouTube downloader (yt-dlp + ffmpeg)</p>
               <fieldset className="setup-radio-group">
-                <legend className="setup-hint">yt-dlp was detected on your system. Which would you prefer?</legend>
+                <legend className="setup-hint">
+                  yt-dlp was detected on your system.{' '}
+                  {setupStatus.ffmpegAvailable === false ? (
+                    <>
+                      ffmpeg was <strong>not</strong> detected — on Windows it will be auto-downloaded
+                      when you pick portable / auto.
+                    </>
+                  ) : setupStatus.ffmpegAvailable === true ? (
+                    <>ffmpeg was also detected. Both tools will be reused.</>
+                  ) : null}
+                  {' '}Which would you prefer?
+                </legend>
                 <label className="setup-radio">
                   <input
                     type="radio"
@@ -238,7 +251,7 @@ export default function SetupPage({ setupStatus, onComplete }: Props) {
                     onChange={(e) => setYtDlpChoice(e.target.value as 'system' | 'portable' | 'auto')}
                     disabled={submitting}
                   />
-                  <span>Use existing system yt-dlp</span>
+                  <span>Use existing system yt-dlp{setupStatus.ffmpegAvailable === false ? ' (you will need to install ffmpeg yourself)' : ''}</span>
                 </label>
                 <label className="setup-radio">
                   <input
@@ -249,7 +262,7 @@ export default function SetupPage({ setupStatus, onComplete }: Props) {
                     onChange={(e) => setYtDlpChoice(e.target.value as 'system' | 'portable' | 'auto')}
                     disabled={submitting}
                   />
-                  <span>Download and use VOOTED portable yt-dlp (bundled in data folder)</span>
+                  <span>Download and use VOOTED portable yt-dlp + ffmpeg (bundled in data folder, Windows only for ffmpeg)</span>
                 </label>
                 <label className="setup-radio">
                   <input
@@ -260,7 +273,7 @@ export default function SetupPage({ setupStatus, onComplete }: Props) {
                     onChange={(e) => setYtDlpChoice(e.target.value as 'system' | 'portable' | 'auto')}
                     disabled={submitting}
                   />
-                  <span>Auto-detect (use system if available, otherwise download portable)</span>
+                  <span>Auto-detect (use system tools if available, otherwise download portable)</span>
                 </label>
               </fieldset>
             </div>

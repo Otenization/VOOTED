@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { downloadYtDlp, ensureYtDlpAvailable } from "./yt-dlp-manager.service.js";
+import { downloadPortableFfmpeg, ensureFfmpegAvailable } from "./ffmpeg-manager.service.js";
 
 const RUNTIME_CONFIG_FILENAME = "vooted.runtime.json";
 const LEGACY_RUNTIME_CONFIG_FILENAME = "voote.runtime.json";
@@ -81,6 +82,7 @@ function buildDefaultConfig() {
     data_dir: "./data",
     downloader: {
       yt_dlp_command: "yt-dlp",
+      ffmpeg_location: "",
       cookies_file: "",
       cookies_from_browser: "",
       format:
@@ -185,6 +187,15 @@ function setRuntimeYtDlpCommand(runtimeConfigPath, ytDlpCommand) {
   writeRuntimeConfig(runtimeConfigPath, currentConfig);
 }
 
+function setRuntimeFfmpegLocation(runtimeConfigPath, ffmpegLocation) {
+  const currentConfig = parseRuntimeConfig(fs.readFileSync(runtimeConfigPath, "utf-8"), runtimeConfigPath);
+  currentConfig.downloader = {
+    ...(currentConfig.downloader && typeof currentConfig.downloader === "object" ? currentConfig.downloader : {}),
+    ffmpeg_location: ffmpegLocation || "",
+  };
+  writeRuntimeConfig(runtimeConfigPath, currentConfig);
+}
+
 function readRuntimeFromDisk(appDir) {
   const { runtimeConfig, runtimeConfigPath } = readRuntimeConfigOrThrow(appDir);
   const normalized = normalizeRuntimeConfig(runtimeConfig);
@@ -274,6 +285,20 @@ export async function ensureRuntimeBootstrap() {
     console.warn(`[VOOTED] yt-dlp availability check failed: ${err.message}`);
   }
 
+  try {
+    const ffmpegLocation = await ensureFfmpegAvailable(runtime.dataDirAbs);
+    const desired = ffmpegLocation || "";
+    if (runtimeConfig.downloader.ffmpeg_location !== desired) {
+      setRuntimeFfmpegLocation(runtime.runtimeConfigPath, desired);
+      if (desired) {
+        console.log(`[VOOTED] Using bundled ffmpeg at startup: ${desired}`);
+      }
+      return readRuntimeFromDisk(appDir);
+    }
+  } catch (err) {
+    console.warn(`[VOOTED] ffmpeg availability check failed: ${err.message}`);
+  }
+
   return runtime;
 }
 
@@ -308,6 +333,15 @@ export async function completeSetup(vodOutputDir, ytDlpChoice = 'auto') {
     const ytDlpCmd = await downloadYtDlp(runtime.dataDirAbs);
     setRuntimeYtDlpCommand(runtime.runtimeConfigPath, ytDlpCmd);
     console.log(`[VOOTED] Updated yt-dlp command to use bundled version: ${ytDlpCmd}`);
+
+    try {
+      const ffmpegLocation = await downloadPortableFfmpeg(runtime.dataDirAbs);
+      setRuntimeFfmpegLocation(runtime.runtimeConfigPath, ffmpegLocation);
+      console.log(`[VOOTED] Updated ffmpeg location to bundled version: ${ffmpegLocation}`);
+    } catch (err) {
+      console.warn(`[VOOTED] Portable ffmpeg setup failed (non-fatal): ${err.message}`);
+    }
+
     return readRuntimeFromDisk(appDir);
   }
 
@@ -319,6 +353,17 @@ export async function completeSetup(vodOutputDir, ytDlpChoice = 'auto') {
     }
   } catch (err) {
     console.warn(`[VOOTED] yt-dlp setup failed (non-fatal): ${err.message}`);
+  }
+
+  try {
+    const ffmpegLocation = await ensureFfmpegAvailable(runtime.dataDirAbs);
+    const desired = ffmpegLocation || '';
+    if (desired) {
+      setRuntimeFfmpegLocation(runtime.runtimeConfigPath, desired);
+      console.log(`[VOOTED] Updated ffmpeg location to bundled version: ${desired}`);
+    }
+  } catch (err) {
+    console.warn(`[VOOTED] ffmpeg setup failed (non-fatal): ${err.message}`);
   }
 
   return readRuntimeFromDisk(appDir);

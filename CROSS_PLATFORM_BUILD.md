@@ -77,6 +77,19 @@ Release/
 
 The original `npm run package` command still works — it produces `Release/VOOTED.exe` (no version suffix) for backwards compatibility.
 
+## Runtime tools (yt-dlp + ffmpeg)
+
+VOOTED shells out to `yt-dlp` for downloads and `ffmpeg` for the final mp4 merge/remux. Both are runtime dependencies, not bundled into the pkg snapshot.
+
+| Tool   | Windows portable auto-provisioning | Other OSes |
+|--------|------------------------------------|------------|
+| yt-dlp | ✓ Single-file `.exe` downloaded into `data/yt-dlp/` when user picks Portable / Auto in setup. | Manual install (`apt install yt-dlp`, `pip install --user yt-dlp`, `brew install yt-dlp`, …). |
+| ffmpeg | ✓ `ffmpeg-release-essentials.zip` from gyan.dev downloaded and extracted into `data/ffmpeg/` when user picks Portable / Auto **and no system ffmpeg is found**. | Not auto-provisioned yet — manual install required (`apt install ffmpeg`, `brew install ffmpeg`, etc.). yt-dlp portable still works on its own; only the merge step needs ffmpeg. |
+
+The bundled-tool location is persisted in `vooted.runtime.json` under `downloader.yt_dlp_command` and `downloader.ffmpeg_location`. yt-dlp gets `--ffmpeg-location <path>` whenever `ffmpeg_location` is configured and the file exists; if the path is stale (e.g., user deleted `data/`) the flag is silently dropped so yt-dlp falls back to PATH.
+
+If a future portable ffmpeg story lands for Linux/macOS, the only work is teaching `ffmpeg-manager.service.js` how to fetch + extract per-OS archives — the runtime config plumbing and the yt-dlp wiring are already platform-agnostic.
+
 ## Testing the binaries
 
 The build script can produce all three binaries from a single host, **but it can't run them**. You have to smoke-test each on its target OS before shipping.

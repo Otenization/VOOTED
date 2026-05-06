@@ -48,6 +48,22 @@ function getCookieArgs(runtime) {
   return [];
 }
 
+function getFfmpegArgs(runtime) {
+  const downloader = runtime.runtimeConfig?.downloader || {};
+  const configured = String(downloader.ffmpeg_location || "").trim();
+
+  if (!configured) {
+    return [];
+  }
+
+  const ffmpegLocation = toAbsolutePath(runtime.appDir, configured);
+  if (!fs.existsSync(ffmpegLocation)) {
+    return [];
+  }
+
+  return ["--ffmpeg-location", ffmpegLocation];
+}
+
 function isCommandAvailable(command, baseDir) {
   const normalized = String(command || '').trim();
   if (!normalized) {
@@ -533,6 +549,7 @@ class YoutubeJobService {
     });
 
     args.push(...getCookieArgs(this.runtime));
+    args.push(...getFfmpegArgs(this.runtime));
     args.push(url);
 
     const probe = spawnSync(command, args, {
@@ -569,6 +586,7 @@ class YoutubeJobService {
     });
 
     args.push(...getCookieArgs(this.runtime));
+    args.push(...getFfmpegArgs(this.runtime));
 
     args.push(url);
     return args;
