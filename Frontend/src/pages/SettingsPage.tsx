@@ -2,16 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import Modal from '../components/Modal';
 import {
+  applySelfUpdate,
   clearCookies,
   fetchCookieStatus,
+  fetchSelfUpdateStatus,
   fetchSettings,
   importCookieFile,
   importPastedCookies,
   updateSettings,
 } from '../lib/vodApi';
 import type {
+  ApplySelfUpdateResult,
   AppSettings,
   CookieStatus,
+  SelfUpdateStatus,
   SettingsPatch,
   SettingsUpdateResponse,
 } from '../lib/vodApi';
@@ -59,6 +63,9 @@ export default function SettingsPage() {
   const [importFilename, setImportFilename] = useState('');
   const [importContent, setImportContent] = useState('');
   const [pasteHeader, setPasteHeader] = useState('');
+  const [updateStatus, setUpdateStatus] = useState<SelfUpdateStatus | null>(null);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateError, setUpdateError] = useState('');
 
   const applySettingsToForm = useCallback((s: AppSettings) => {
     setPortInput(String(s.app.port));
@@ -83,9 +90,23 @@ export default function SettingsPage() {
     }
   }, [applySettingsToForm]);
 
+  const refreshUpdateStatus = useCallback(async () => {
+    setUpdateError('');
+    try {
+      const status = await fetchSelfUpdateStatus();
+      setUpdateStatus(status);
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : 'Failed to check updates');
+    }
+  }, []);
+
   useEffect(() => {
     void refreshAll();
   }, [refreshAll]);
+
+  useEffect(() => {
+    void refreshUpdateStatus();
+  }, [refreshUpdateStatus]);
 
   const dirty = useMemo(() => {
     if (!settings) return false;
@@ -221,6 +242,21 @@ export default function SettingsPage() {
       setDialogError(err instanceof Error ? err.message : 'Failed to clear cookies');
     } finally {
       setDialogBusy(false);
+    }
+  }, []);
+
+  const handleApplyUpdate = useCallback(async () => {
+    setUpdateBusy(true);
+    setUpdateError('');
+    setSaveNotice('');
+    setSaveError('');
+    try {
+      const result: ApplySelfUpdateResult = await applySelfUpdate();
+      setSaveNotice(result.message || 'Update downloaded. Restarting VOOTED...');
+    } catch (err) {
+      setUpdateError(err instanceof Error ? err.message : 'Failed to apply update');
+    } finally {
+      setUpdateBusy(false);
     }
   }, []);
 
@@ -448,6 +484,72 @@ export default function SettingsPage() {
             }}
           >
             Clear cookies
+          </button>
+        </div>
+      </article>
+
+      <article className="panel cookie-manager-panel">
+        <header className="cookie-manager-header">
+          <div>
+            <p className="eyebrow">App update</p>
+            <h3>Self-update</h3>
+          </div>
+        </header>
+
+        <p className="muted-copy">
+          Check GitHub releases and update VOOTED in-place. When an update is applied,
+          VOOTED downloads the new binary, exits, replaces the old executable, and
+          launches the new version.
+        </p>
+
+        <dl className="cookie-status-grid">
+          <div>
+            <dt>Current</dt>
+            <dd>{updateStatus?.currentVersion || '—'}</dd>
+          </div>
+          <div>
+            <dt>Latest</dt>
+            <dd>{updateStatus?.latestTag || '—'}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>
+              {!updateStatus
+                ? 'Unknown'
+                : updateStatus.updateAvailable
+                  ? 'Update available'
+                  : 'Up to date'}
+            </dd>
+          </div>
+          <div>
+            <dt>Asset</dt>
+            <dd><code className="cookie-status-path">{updateStatus?.assetName || '—'}</code></dd>
+          </div>
+        </dl>
+
+        {updateError ? <p className="message error">{updateError}</p> : null}
+
+        <div className="cookie-manager-actions">
+          <button
+            type="button"
+            className="secondary-btn"
+            disabled={updateBusy}
+            onClick={() => void refreshUpdateStatus()}
+          >
+            {updateBusy ? 'Working…' : 'Check for updates'}
+          </button>
+          <button
+            type="button"
+            className="primary-btn"
+            disabled={
+              updateBusy
+              || !updateStatus
+              || !updateStatus.platformSupported
+              || !updateStatus.updateAvailable
+            }
+            onClick={() => void handleApplyUpdate()}
+          >
+            {updateBusy ? 'Applying update…' : 'Download and restart'}
           </button>
         </div>
       </article>

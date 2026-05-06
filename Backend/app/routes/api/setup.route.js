@@ -1,6 +1,7 @@
 import { completeSetup } from '../../services/runtime-bootstrap.service.js'
 import { isYtDlpAvailable } from '../../services/yt-dlp-manager.service.js'
 import { pickFolder } from '../../services/folder-picker.service.js'
+import { checkFolderSafety } from '../../services/folder-safety.service.js'
 import {
   resetYoutubeJobService,
   peekYoutubeJobService,
@@ -18,12 +19,19 @@ export default async function setupRoutes(fastify) {
   fastify.get('/status', async (_request, reply) => {
     const needsSetup = peekYoutubeJobService() === null
     const ytDlpAvailable = isYtDlpAvailable()
+    const appDir = fastify.runtime?.appDir || null
+    // Only useful while the user is actually on the setup screen — a noisy
+    // shared folder is the warning we want to surface there. Computing it
+    // unconditionally keeps the contract simple (frontend just looks at the
+    // shape) and the cost is one readdirSync.
+    const folderSafety = checkFolderSafety(appDir)
     return reply.send({
       ok: true,
       data: {
         needsSetup,
-        appDir: fastify.runtime?.appDir || null,
+        appDir,
         ytDlpAvailable,
+        folderSafety,
       },
     })
   })

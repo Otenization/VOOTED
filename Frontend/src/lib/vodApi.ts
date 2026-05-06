@@ -207,10 +207,17 @@ export const startVodQueue = (): Promise<VodMeta['queue']> =>
 
 // --- Setup API ---
 
+export type FolderSafety = {
+  safe: boolean;
+  neighbors: string[];
+  totalCount: number;
+};
+
 export type SetupStatus = {
   needsSetup: boolean;
   appDir: string | null;
   ytDlpAvailable: boolean;
+  folderSafety?: FolderSafety;
 };
 
 export const fetchSetupStatus = (signal?: AbortSignal): Promise<SetupStatus> =>
@@ -343,6 +350,32 @@ export const importPastedCookies = (header: string): Promise<PastedCookieResult>
 
 export const clearCookies = (): Promise<CookieStatus> =>
   requestJson<CookieStatus>('/api/settings/cookies/clear', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+
+// --- Self-update API ---
+
+export type SelfUpdateStatus = {
+  repo: string;
+  currentVersion: string;
+  latestTag: string;
+  latestVersion: string;
+  updateAvailable: boolean;
+  platformSupported: boolean;
+  assetName: string;
+  assetUrl: string;
+  releaseUrl: string;
+  publishedAt: string | null;
+};
+
+export const fetchSelfUpdateStatus = (): Promise<SelfUpdateStatus> =>
+  requestJson<SelfUpdateStatus>('/api/update/status', undefined);
+
+export type ApplySelfUpdateResult = SelfUpdateStatus & { message: string };
+
+export const applySelfUpdate = (): Promise<ApplySelfUpdateResult> =>
+  requestJson<ApplySelfUpdateResult>('/api/update/apply', {
     method: 'POST',
     body: JSON.stringify({}),
   });

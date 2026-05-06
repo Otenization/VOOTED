@@ -2,6 +2,7 @@ import exampleItemRoutes from './template-item.route.js'
 import vodRoutes from './vod.route.js'
 import setupRoutes from './setup.route.js'
 import settingsRoutes from './settings.route.js'
+import updateRoutes from './update.route.js'
 
 export default async function (fastify) {
   // You can add api-level permissions/middleware here in the future
@@ -51,6 +52,8 @@ export default async function (fastify) {
   await fastify.register(vodRoutes, { prefix: '/vod' })
 
   await fastify.register(settingsRoutes, { prefix: '/settings' })
+
+  await fastify.register(updateRoutes, { prefix: '/update' })
 
   await fastify.register(exampleItemRoutes, { prefix: '/template-items' })
 

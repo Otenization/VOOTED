@@ -133,6 +133,39 @@ export default function SetupPage({ setupStatus, onComplete }: Props) {
           </p>
         </div>
 
+        {setupStatus.folderSafety && !setupStatus.folderSafety.safe ? (
+          <div className="setup-section setup-section-danger">
+            <p className="setup-label setup-label-danger">
+              🚨 This folder isn&rsquo;t empty
+            </p>
+            <p className="setup-hint">
+              VOOTED found <strong>{setupStatus.folderSafety.totalCount}</strong>
+              {' '}other file{setupStatus.folderSafety.totalCount === 1 ? '' : 's'}
+              {' '}/ folder{setupStatus.folderSafety.totalCount === 1 ? '' : 's'} sitting next
+              to the app. If this is your <strong>Downloads</strong>, <strong>Desktop</strong>,
+              or any shared folder, please move VOOTED to its own dedicated folder before
+              confirming — otherwise its data will mix in with everything else here.
+            </p>
+            <ul className="setup-neighbor-list">
+              {setupStatus.folderSafety.neighbors.map((name) => (
+                <li key={name}>
+                  <code>{name}</code>
+                </li>
+              ))}
+              {setupStatus.folderSafety.totalCount > setupStatus.folderSafety.neighbors.length ? (
+                <li className="setup-neighbor-more">
+                  …and {setupStatus.folderSafety.totalCount - setupStatus.folderSafety.neighbors.length}
+                  {' '}more
+                </li>
+              ) : null}
+            </ul>
+            <p className="setup-hint setup-hint-tip">
+              Tip: open the <strong>Not the right place?</strong> guide below for the
+              clean way to move the app folder.
+            </p>
+          </div>
+        ) : null}
+
         <details className="setup-howto">
           <summary>Not the right place? Here&rsquo;s how to move VOOTED →</summary>
           <ol className="setup-steps">
